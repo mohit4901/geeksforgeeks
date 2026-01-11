@@ -1,0 +1,86 @@
+{
+   
+  
+    "S3_PUBLIC_ACCESS": {
+      "resource": "s3",
+      "condition": "public == true",
+      "severity": "CRITICAL",
+      "description": "S3 bucket is publicly accessible",
+      "fix": "Block public access and restrict bucket policy"
+    },
+  
+    "EC2_NO_IAM_ROLE": {
+      "resource": "ec2",
+      "condition": "hasIAM == false",
+      "severity": "CRITICAL",
+      "description": "EC2 instance does not have an IAM role",
+      "fix": "Attach an IAM role with least-privilege permissions"
+    },
+  
+    "EC2_OPEN_SG": {
+      "resource": "ec2",
+      "condition": "isPublic == true",
+      "severity": "HIGH",
+      "description": "EC2 security group allows public inbound traffic",
+      "fix": "Restrict inbound rules to trusted IP ranges"
+    },
+  
+  
+    "NO_VPC_ISOLATION": {
+      "resource": "vpc",
+      "condition": "isolated == false",
+      "severity": "HIGH",
+      "description": "Resources are not isolated inside a private VPC",
+      "fix": "Deploy resources inside a private VPC with subnets"
+    },
+  
+    "NO_NAT_GATEWAY": {
+  "resource": "vpc",
+  "condition": "natGateway == false && hasPrivateCompute == true",
+  "severity": "MEDIUM",
+  "description": "Private compute resources lack NAT Gateway",
+  "fix": "Add NAT Gateway for outbound internet access"
+},
+
+  
+    "NO_LOGGING_ENABLED": {
+      "resource": "global",
+      "condition": "logging == false",
+      "severity": "LOW",
+      "description": "Centralized logging is not enabled",
+      "fix": "Enable CloudWatch / S3 access logging"
+    },
+  
+    "S3_ENCRYPTION_DISABLED": {
+      "resource": "s3",
+      "condition": "encrypted == false",
+      "severity": "HIGH",
+      "description": "S3 bucket encryption must be enabled",
+      "fix": "Enable server-side encryption (SSE-S3 or SSE-KMS)"
+    },
+  
+    "EC2_OPEN_SSH": {
+      "resource": "ec2",
+      "condition": "isPublic == true",
+      "severity": "HIGH",
+      "description": "EC2 allows SSH access from 0.0.0.0/0",
+      "fix": "Restrict SSH access to trusted IP ranges"
+    },
+  
+    "EC2_NO_AUTOSCALING": {
+      "resource": "ec2",
+      "condition": "scalable == false",
+      "severity": "MEDIUM",
+      "description": "EC2 is not part of an Auto Scaling Group",
+      "fix": "Use Auto Scaling Group for resilience"
+    },
+  
+    "EC2_SINGLE_AZ": {
+      "resource": "ec2",
+      "condition": "singleAZ == true",
+      "severity": "MEDIUM",
+      "description": "EC2 deployed in a single Availability Zone",
+      "fix": "Deploy across multiple AZs"
+    }
+  }
+  

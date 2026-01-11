@@ -1,0 +1,229 @@
+@import "tailwindcss";
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f5f5f5;
+}
+
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  height: 100vh;
+  width:screen;
+  padding: 12px;
+}
+.security {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.score-wrapper {
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.score-label {
+  font-size: 12px;
+  color: #555;
+}
+
+.score {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.score-bar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.score-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.violations {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.violation {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-left: 4px solid #e5e7eb;
+  background: #fff;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.severity {
+  font-weight: bold;
+  min-width: 70px;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.desc {
+  margin: 0;
+  font-size: 14px;
+}
+
+.fix {
+  margin: 0;
+  font-size: 12px;
+  color: #2563eb;
+}
+
+.secure {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+
+.infra-input {
+  background: linear-gradient(145deg, #0b1220, #060b14);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 18px;
+  width: 100%;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+}
+
+.prompt-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot.red {
+  background: #ff5f56;
+}
+.dot.yellow {
+  background: #ffbd2e;
+}
+.dot.green {
+  background: #27c93f;
+}
+
+.title {
+  margin-left: 10px;
+  font-size: 13px;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.prompt-box {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  color: white;
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 12px 0;
+}
+
+.prompt-box::placeholder {
+  color: #64748b;
+}
+
+.generate-btn {
+  margin-top: 16px;
+  width: 100%;
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  color: #020617;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.generate-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px rgba(56, 189, 248, 0.5);
+}
+
+.generate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.diagram-canvas {
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(56, 189, 248, 0.08),
+      transparent 60%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.95),
+      rgba(2, 6, 23, 0.98)
+    );
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node ellipse {
+  fill: #020617;
+  stroke: #38bdf8;
+  stroke-width: 1.5px;
+}
+
+.mermaid .node text {
+  fill: #e5e7eb;
+  font-weight: 500;
+}
+
+.mermaid .edgePath path {
+  stroke: #94a3b8;
+  stroke-width: 1.5px;
+}
+
+.mermaid marker path {
+  fill: #94a3b8;
+}

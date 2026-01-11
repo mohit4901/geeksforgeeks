@@ -1,0 +1,12 @@
+{
+    "default": {
+      "logging": false,
+      "monitoring": false,
+      "backup": false
+    },
+    "aws": {
+      "regions": ["us-east-1"],
+      "multiAZ": false
+    }
+  }
+  
