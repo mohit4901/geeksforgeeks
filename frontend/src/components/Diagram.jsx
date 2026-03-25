@@ -28,61 +28,18 @@ import {
   Boxes
 } from "lucide-react";
 
+/* -------------------- Theme -------------------- */
+
 const NODE_THEME = {
-  vpc: {
-    bg: "#0f172a",
-    border: "#3b82f6",
-    icon: Cloud,
-    label: "VPC"
-  },
-  subnet: {
-    bg: "#111827",
-    border: "#38bdf8",
-    icon: Network,
-    label: "Subnet"
-  },
-  gateway: {
-    bg: "#172554",
-    border: "#6366f1",
-    icon: Globe,
-    label: "Gateway"
-  },
-  route: {
-    bg: "#1e293b",
-    border: "#60a5fa",
-    icon: Route,
-    label: "Route"
-  },
-  ec2: {
-    bg: "#1e1b4b",
-    border: "#8b5cf6",
-    icon: Server,
-    label: "EC2"
-  },
-  s3: {
-    bg: "#052e16",
-    border: "#22c55e",
-    icon: HardDrive,
-    label: "S3"
-  },
-  security: {
-    bg: "#3f1d2e",
-    border: "#f43f5e",
-    icon: Shield,
-    label: "Security"
-  },
-  database: {
-    bg: "#3b0764",
-    border: "#c084fc",
-    icon: Database,
-    label: "Database"
-  },
-  custom: {
-    bg: "#111827",
-    border: "#f59e0b",
-    icon: Boxes,
-    label: "Custom"
-  }
+  vpc: { bg: "#0f172a", border: "#3b82f6", icon: Cloud, label: "VPC" },
+  subnet: { bg: "#111827", border: "#38bdf8", icon: Network, label: "Subnet" },
+  gateway: { bg: "#172554", border: "#6366f1", icon: Globe, label: "Gateway" },
+  route: { bg: "#1e293b", border: "#60a5fa", icon: Route, label: "Route" },
+  ec2: { bg: "#1e1b4b", border: "#8b5cf6", icon: Server, label: "EC2" },
+  s3: { bg: "#052e16", border: "#22c55e", icon: HardDrive, label: "S3" },
+  security: { bg: "#3f1d2e", border: "#f43f5e", icon: Shield, label: "Security" },
+  database: { bg: "#3b0764", border: "#c084fc", icon: Database, label: "Database" },
+  custom: { bg: "#111827", border: "#f59e0b", icon: Boxes, label: "Custom" }
 };
 
 function inferType(label = "") {
@@ -100,8 +57,19 @@ function inferType(label = "") {
   return "custom";
 }
 
+/* -------------------- Global Actions -------------------- */
+
+if (!window.__diagramActions) {
+  window.__diagramActions = {
+    renameNode: () => {},
+    deleteNode: () => {}
+  };
+}
+
+/* -------------------- Custom Node -------------------- */
+
 function AwsNode({ id, data, selected }) {
-  const { label, type, onRename, onDelete } = data;
+  const { label, type } = data;
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(label);
 
@@ -114,7 +82,7 @@ function AwsNode({ id, data, selected }) {
 
   const saveRename = () => {
     const trimmed = value.trim() || "Unnamed Node";
-    onRename(id, trimmed);
+    window.__diagramActions.renameNode(id, trimmed);
     setEditing(false);
   };
 
@@ -130,7 +98,11 @@ function AwsNode({ id, data, selected }) {
           : "0 14px 34px rgba(0,0,0,0.30)"
       }}
     >
-      <Handle type="target" position={Position.Top} style={{ background: theme.border, width: 10, height: 10 }} />
+      <Handle
+        type="target"
+        position={Position.Top}
+        style={{ background: theme.border, width: 10, height: 10 }}
+      />
 
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
@@ -183,7 +155,7 @@ function AwsNode({ id, data, selected }) {
             </button>
 
             <button
-              onClick={() => onDelete(id)}
+              onClick={() => window.__diagramActions.deleteNode(id)}
               className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 transition"
               title="Delete"
             >
@@ -198,40 +170,45 @@ function AwsNode({ id, data, selected }) {
         </div>
       </div>
 
-      <Handle type="source" position={Position.Bottom} style={{ background: theme.border, width: 10, height: 10 }} />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        style={{ background: theme.border, width: 10, height: 10 }}
+      />
     </div>
   );
 }
 
-const nodeTypes = {
-  awsNode: AwsNode
-};
+/* IMPORTANT: stable outside component */
+const nodeTypes = { awsNode: AwsNode };
 
-function buildFlowFromDiagram(diagram = "", onRename = () => {}, onDelete = () => {}) {
+/* -------------------- Parser -------------------- */
+
+function cleanDiagram(diagram = "") {
+  return diagram
+    .replace(/\r/g, "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(
+      (l) =>
+        l &&
+        !l.startsWith("flowchart") &&
+        !l.startsWith("graph") &&
+        !l.startsWith("classDef") &&
+        !l.startsWith("class ") &&
+        !l.startsWith("style ") &&
+        !l.startsWith("linkStyle") &&
+        !l.startsWith("subgraph") &&
+        l !== "end"
+    );
+}
+
+function buildFlowFromDiagram(diagram = "") {
   const nodes = [];
   const edges = [];
   const added = new Set();
 
-  if (!diagram || typeof diagram !== "string") {
-    return {
-      nodes: [
-        {
-          id: "empty",
-          type: "awsNode",
-          position: { x: 240, y: 120 },
-          data: {
-            label: "No Architecture Generated",
-            type: "custom",
-            onRename,
-            onDelete
-          }
-        }
-      ],
-      edges: []
-    };
-  }
-
-  const lines = diagram.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lines = cleanDiagram(diagram);
 
   let x = 100;
   let y = 80;
@@ -246,9 +223,7 @@ function buildFlowFromDiagram(diagram = "", onRename = () => {}, onDelete = () =
         position: { x, y },
         data: {
           label,
-          type: inferType(label),
-          onRename,
-          onDelete
+          type: inferType(label)
         }
       });
 
@@ -263,24 +238,32 @@ function buildFlowFromDiagram(diagram = "", onRename = () => {}, onDelete = () =
   }
 
   lines.forEach((line) => {
-    const nodeMatch = line.match(/^([A-Za-z0-9_]+)\["?(.+?)"?\]$/);
+    let nodeMatch = line.match(/^([A-Za-z0-9_]+)\["(.+?)"\]$/);
+    if (!nodeMatch) nodeMatch = line.match(/^([A-Za-z0-9_]+)\[(.+?)\]$/);
+    if (!nodeMatch) nodeMatch = line.match(/^([A-Za-z0-9_]+)\("(.+?)"\)$/);
+    if (!nodeMatch) nodeMatch = line.match(/^([A-Za-z0-9_]+)\((.+?)\)$/);
+
     const edgeMatch = line.match(/^([A-Za-z0-9_]+)\s*-->\s*([A-Za-z0-9_]+)$/);
 
     if (nodeMatch) {
       const id = nodeMatch[1];
-      const label = nodeMatch[2];
+      const label = nodeMatch[2].replace(/\\n/g, " ");
       pushNode(id, label);
     }
 
     if (edgeMatch) {
+      const source = edgeMatch[1];
+      const target = edgeMatch[2];
+
+      if (!added.has(source)) pushNode(source, source);
+      if (!added.has(target)) pushNode(target, target);
+
       edges.push({
-        id: `${edgeMatch[1]}-${edgeMatch[2]}`,
-        source: edgeMatch[1],
-        target: edgeMatch[2],
+        id: `${source}-${target}`,
+        source,
+        target,
         animated: true,
-        markerEnd: {
-          type: MarkerType.ArrowClosed
-        },
+        markerEnd: { type: MarkerType.ArrowClosed },
         style: {
           stroke: "#94a3b8",
           strokeWidth: 2.2
@@ -293,12 +276,10 @@ function buildFlowFromDiagram(diagram = "", onRename = () => {}, onDelete = () =
     nodes.push({
       id: "fallback",
       type: "awsNode",
-      position: { x: 200, y: 120 },
+      position: { x: 240, y: 120 },
       data: {
         label: "Architecture Unavailable",
-        type: "custom",
-        onRename,
-        onDelete
+        type: "custom"
       }
     });
   }
@@ -306,9 +287,23 @@ function buildFlowFromDiagram(diagram = "", onRename = () => {}, onDelete = () =
   return { nodes, edges };
 }
 
+/* -------------------- Component -------------------- */
+
 export default function Diagram({ diagram }) {
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
+
+  const initialFlow = useMemo(() => buildFlowFromDiagram(diagram), [diagram]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialFlow.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialFlow.edges);
+
+  useEffect(() => {
+    const flow = buildFlowFromDiagram(diagram);
+    setNodes(flow.nodes);
+    setEdges(flow.edges);
+    setSelectedNodeId(null);
+  }, [diagram, setNodes, setEdges]);
 
   const handleRenameNode = useCallback((id, newLabel) => {
     setNodes((nds) =>
@@ -319,36 +314,24 @@ export default function Diagram({ diagram }) {
               data: {
                 ...node.data,
                 label: newLabel,
-                type: inferType(newLabel),
-                onRename: handleRenameNode,
-                onDelete: handleDeleteNode
+                type: inferType(newLabel)
               }
             }
           : node
       )
     );
-  }, []);
+  }, [setNodes]);
 
   const handleDeleteNode = useCallback((id) => {
     setNodes((nds) => nds.filter((node) => node.id !== id));
     setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
     setSelectedNodeId((curr) => (curr === id ? null : curr));
-  }, []);
-
-  const initialFlow = useMemo(
-    () => buildFlowFromDiagram(diagram, handleRenameNode, handleDeleteNode),
-    [diagram, handleRenameNode, handleDeleteNode]
-  );
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialFlow.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialFlow.edges);
+  }, [setNodes, setEdges]);
 
   useEffect(() => {
-    const flow = buildFlowFromDiagram(diagram, handleRenameNode, handleDeleteNode);
-    setNodes(flow.nodes);
-    setEdges(flow.edges);
-    setSelectedNodeId(null);
-  }, [diagram, setNodes, setEdges, handleRenameNode, handleDeleteNode]);
+    window.__diagramActions.renameNode = handleRenameNode;
+    window.__diagramActions.deleteNode = handleDeleteNode;
+  }, [handleRenameNode, handleDeleteNode]);
 
   const onConnect = useCallback(
     (params) =>
@@ -388,9 +371,7 @@ export default function Diagram({ diagram }) {
         position: { x: 320, y: 320 },
         data: {
           label: defaultLabel,
-          type,
-          onRename: handleRenameNode,
-          onDelete: handleDeleteNode
+          type
         }
       }
     ]);
@@ -399,7 +380,7 @@ export default function Diagram({ diagram }) {
   };
 
   const resetLayout = () => {
-    const flow = buildFlowFromDiagram(diagram, handleRenameNode, handleDeleteNode);
+    const flow = buildFlowFromDiagram(diagram);
     setNodes(flow.nodes);
     setEdges(flow.edges);
     setSelectedNodeId(null);
