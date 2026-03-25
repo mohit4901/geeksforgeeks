@@ -1,7 +1,8 @@
-const express = require("express");
+import express from "express";
+import { createIntent } from "../controllers/intent.controller.js";
+
 const router = express.Router();
-const { createIntent } = require("../controllers/intent.controller");
 
 router.post("/", createIntent);
 
-module.exports = router;
+export default router;

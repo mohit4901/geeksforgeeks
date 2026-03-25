@@ -6,7 +6,7 @@ export default function App() {
   const workspace = useWorkspace();
 
   return workspace.data ? (
-    <Workspace {...workspace} />
+    <Workspace data={workspace.data} />
   ) : (
     <Landing onCreate={workspace.create} loading={workspace.loading} />
   );

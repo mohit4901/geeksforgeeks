@@ -1,50 +1,51 @@
-const { generateIaC } = require("../services/aiProvider.service");
-const { buildCanonicalModel } = require("../services/canonicalModel.service");
-const { buildDiagram } = require("../services/diagram.service");
-const { validateSecurityRules } = require("../services/security.service");
+import { generateAI } from "../services/aiProvider.service.js";
+import {
+  generateTerraformPrompt,
+  parseTerraform,
+  extractResources
+} from "../services/terraform.service.js";
+import { buildDiagram } from "../services/diagram.service.js";
+import { evaluateSecurity } from "../services/security.service.js";
+import { calculateMetrics } from "../services/metrics.service.js";
 
-exports.createIntent = async (req, res) => {
+export async function createIntent(req, res) {
   try {
     const { prompt } = req.body;
 
-    if (!prompt) {
-      return res.status(400).json({ error: "Prompt is required" });
+    if (!prompt || typeof prompt !== "string") {
+      return res.status(400).json({
+        success: false,
+        error: "prompt is required"
+      });
     }
 
-    const iac = await generateIaC(prompt);
+    const aiPrompt = generateTerraformPrompt(prompt);
+    const aiOutput = await generateAI(aiPrompt);
 
-    const model = buildCanonicalModel(iac);
+    const files = parseTerraform(aiOutput);
+    const mainTf = files["main.tf"] || "";
 
-    const diagram = buildDiagram(model);
+    const diagram = buildDiagram(mainTf);
+    const security = evaluateSecurity(mainTf);
 
-    const security = validateSecurityRules(model);
-
-    const metrics = {
-      totalResources: model.services.length,
-      securityScore: security.score,
-      riskDensity:
-        model.services.length === 0
-          ? 0
-          : Math.round(
-              (security.violations.length / model.services.length) * 100
-            ),
-      complexity:
-        model.services.length < 5
-          ? "Low"
-          : model.services.length < 10
-          ? "Medium"
-          : "High"
+    const model = {
+      services: extractResources(mainTf)
     };
 
-    res.json({
-      iac,
-      model,
+    const metrics = calculateMetrics(model, security);
+
+    return res.json({
+      success: true,
+      files,
       diagram,
       security,
       metrics
     });
   } catch (err) {
-    console.error("INTENT ERROR:", err);
-    res.status(500).json({ error: "Failed to generate IaC" });
+    console.error("createIntent error:", err?.response?.data || err.message || err);
+    return res.status(500).json({
+      success: false,
+      error: "Intent failed"
+    });
   }
-};
+}

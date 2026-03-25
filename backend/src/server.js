@@ -1,8 +1,9 @@
-const app = require("./app");
+import dotenv from "dotenv";
+dotenv.config();
+
+import app from "./app.js";
 
 const PORT = process.env.PORT || 4000;
-
-app.use("/api/re-evaluate", require("./routes/reevaluate.routes"));
 
 app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);

@@ -1,7 +1,8 @@
-const express = require("express");
+import express from "express";
+import { generateMetrics } from "../controllers/metrics.controller.js";
+
 const router = express.Router();
-const { generateMetrics } = require("../controllers/metrics.controller");
 
 router.post("/", generateMetrics);
 
-module.exports = router;
+export default router;

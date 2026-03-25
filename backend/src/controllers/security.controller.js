@@ -1,12 +1,53 @@
-const { validateSecurityRules, autoFixIaC } = require("../services/security.service");
+import { evaluateSecurity, autoFixIaC } from "../services/security.service.js";
 
-exports.validateSecurity = (req, res) => {
-  const { model } = req.body;
-  res.json(validateSecurityRules(model));
-};
+export function validateSecurity(req, res) {
+  try {
+    const { terraform } = req.body;
 
-exports.autoFix = async (req, res) => {
-  const { iac, violations } = req.body;
-  const fixedIaC = await autoFixIaC(iac, violations);
-  res.json({ fixedIaC });
-};
+    if (!terraform || typeof terraform !== "string") {
+      return res.status(400).json({
+        success: false,
+        error: "terraform is required"
+      });
+    }
+
+    const result = evaluateSecurity(terraform);
+
+    return res.json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    console.error("validateSecurity error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Security validation failed"
+    });
+  }
+}
+
+export async function autoFix(req, res) {
+  try {
+    const { terraform, violations } = req.body;
+
+    if (!terraform || typeof terraform !== "string") {
+      return res.status(400).json({
+        success: false,
+        error: "terraform is required"
+      });
+    }
+
+    const fixedIaC = await autoFixIaC(terraform, violations || []);
+
+    return res.json({
+      success: true,
+      fixedIaC
+    });
+  } catch (error) {
+    console.error("autoFix error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Auto-fix failed"
+    });
+  }
+}

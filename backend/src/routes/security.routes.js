@@ -1,8 +1,9 @@
-const express = require("express");
+import express from "express";
+import { validateSecurity, autoFix } from "../controllers/security.controller.js";
+
 const router = express.Router();
-const { validateSecurity, autoFix } = require("../controllers/security.controller");
 
 router.post("/validate", validateSecurity);
 router.post("/fix", autoFix);
 
-module.exports = router;
+export default router;

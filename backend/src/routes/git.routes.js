@@ -1,7 +1,8 @@
-const express = require("express");
+import express from "express";
+import { pushToGitHub } from "../controllers/git.controller.js";
+
 const router = express.Router();
-const { pushToGitHub } = require("../controllers/git.controller");
 
 router.post("/push", pushToGitHub);
 
-module.exports = router;
+export default router;

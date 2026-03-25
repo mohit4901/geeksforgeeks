@@ -36,3 +36,8 @@ terraform.tfvars
 
 .env
 .env.*
+
+# Secrets
+.env
+backend/.env
+frontend/.env

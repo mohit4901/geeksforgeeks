@@ -1,7 +1,8 @@
-const express = require("express");
+import express from "express";
+import { syncIaC } from "../controllers/iac.controller.js";
+
 const router = express.Router();
-const { syncIaC } = require("../controllers/iac.controller");
 
 router.post("/sync", syncIaC);
 
-module.exports = router;
+export default router;

@@ -7,24 +7,42 @@ const api = axios.create({
   }
 });
 
-
 export async function createIntent(prompt) {
   const res = await api.post("/intent", { prompt });
   return res.data;
 }
 
+export async function reEvaluateIaC(terraform) {
+  const [diagramRes, securityRes, metricsRes] = await Promise.all([
+    api.post("/diagram", { terraform }),
+    api.post("/security/validate", { terraform }),
+    api.post("/metrics", { terraform })
+  ]);
 
-export async function reEvaluateIaC(iac) {
-  const res = await api.post("/re-evaluate", { iac });
+  return {
+    diagram: diagramRes.data.diagram,
+    security: {
+      score: securityRes.data.score,
+      violations: securityRes.data.violations
+    },
+    metrics: metricsRes.data.metrics
+  };
+}
+
+export async function pushToGitHub({ repo, terraform, token }) {
+  const res = await api.post("/git/push", {
+    repo,
+    terraform,
+    token
+  });
+
   return res.data;
 }
 
-
-export async function pushToGitHub({ repo, iac, token }) {
-  const res = await api.post("/github/push", {
-    repo,
-    iac,
-    token
+export async function autoFixSecurity(terraform, violations = []) {
+  const res = await api.post("/security/fix", {
+    terraform,
+    violations
   });
 
   return res.data;

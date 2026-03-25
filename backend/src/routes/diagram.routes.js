@@ -1,7 +1,8 @@
-const express = require("express");
+import express from "express";
+import { generateDiagram } from "../controllers/diagram.controller.js";
+
 const router = express.Router();
-const { generateDiagram } = require("../controllers/diagram.controller");
 
 router.post("/", generateDiagram);
 
-module.exports = router;
+export default router;

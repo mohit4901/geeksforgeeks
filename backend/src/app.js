@@ -1,28 +1,31 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
+import dotenv from "dotenv";
+import express from "express";
+import cors from "cors";
 
-const intentRoutes = require("./routes/intent.routes");
-const iacRoutes = require("./routes/iac.routes");
-const diagramRoutes = require("./routes/diagram.routes");
-const securityRoutes = require("./routes/security.routes");
-const personaRoutes = require("./routes/persona.routes");
-const timeMachineRoutes = require("./routes/timemachine.routes");
-const metricsRoutes = require("./routes/metrics.routes");
-const gitRoutes = require("./routes/git.routes");
+import intentRoutes from "./routes/intent.routes.js";
+import diagramRoutes from "./routes/diagram.routes.js";
+import securityRoutes from "./routes/security.routes.js";
+import metricsRoutes from "./routes/metrics.routes.js";
+import gitRoutes from "./routes/git.routes.js";
+
+dotenv.config();
 
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
+
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "AI Cloud Infra Designer Backend is running 🚀"
+  });
+});
 
 app.use("/api/intent", intentRoutes);
-app.use("/api/iac", iacRoutes);
 app.use("/api/diagram", diagramRoutes);
 app.use("/api/security", securityRoutes);
-app.use("/api/persona", personaRoutes);
-app.use("/api/timemachine", timeMachineRoutes);
 app.use("/api/metrics", metricsRoutes);
 app.use("/api/git", gitRoutes);
 
-module.exports = app;
+export default app;
